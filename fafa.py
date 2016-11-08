@@ -2,20 +2,20 @@ import numpy
 import math
 
 def runge_kutta(f, iterations, h, x, y):
-    value = x,y
-    for i in range(1, iterations+1):
+    value = runge_kutta_formula(f,h,x,y)
+    for i in range(1, iterations):
         value = runge_kutta_formula(f, h, value[0], value[1])
     return value
 
 def runge_kutta_formula(f, h, x, y):
-    x = x + h
+    x_new = x + h
     k1 = h * f(x, y)
     k2 = h * f(x + (h / 2), y + (k1 / 2))
     k3 = h * f(x + (h / 2), y + (k2 / 2))
     k4 = h * f(x + h, y + k3)
     m = (k1 + 2*k2 + 2*k3 + k4)/6
-    y = y + m
-    return x, y
+    y_new = y + m
+    return [x_new,y_new]
 
 def romberg(f, a, b, p,error):
     matrix = numpy.zeros((p, p))
@@ -48,7 +48,7 @@ MAIN............................................................................
 
 f = lambda x: math.sin(x)/x
 g = lambda x: math.log(x, math.e)
-h = lambda x: math.sin(x) / x
+h = lambda x,y: -2.0*x*y
 
 #-------------------------------TRAPECIOS-------------------------------
 for i in range(1,25):
@@ -69,5 +69,4 @@ print "Result romberg %d , %f" % (result[0],result[1][last-1][last-1])
 #-------------------------------RUNGE KUTTA-------------------------------
 for i in range(1, 11):
     result = runge_kutta(h, i, 0.1, 0, 1)
-    print "X(%d) = %f" % (i, result[0])
-    print "Y(%d) = %f" % (i, result[1])
+    print "X,Y(%d) = %f,%f" % (i, result[0],result[1])
