@@ -1,4 +1,5 @@
 import numpy
+import math
 
 def fun(x, y):
     return -2*(x*y)
@@ -21,52 +22,55 @@ def runge_kutta_iter(iterations, h, x0, y0):
         result = runge_kutta(h, result[0], result[1])
     return result
 
-def romberg( f, a, b, n, cota):
-    """
-    INPUT:
-        f       - function to integrate,
-        [a, b]  - the interval of integration,
-        n       - number of levels of recursion
 
-    OUTPUT:
-        numpy float array - Romberg integration array; most accurate
-                            answer should be at bottom of right-most column,
-    """
+def romberg(f, a, b, p,error):
+    matrix = numpy.zeros((p, p))
+    for k in range(0, p):
 
-    matrix = numpy.array( [[0] * (n+1)] * (n+1), float )
-    h = b - a
-    matrix[0,0] = 0.5 * h * ( f(a) + f(b) )
+        matrix[k, 0] = trapezoidal_rule(f, a, b, 2 ** k)
+        
+        for j in range(0, k):
+            matrix[k, j + 1] = (4 ** (j + 1) * matrix[k, j] - matrix[k - 1, j]) / (4 ** (j + 1) - 1)
 
-    powerOf2 = 1
-    for i in range( 1, n + 1 ):
-        h = 0.5 * h
+        if((abs(matrix[k,k]-matrix[k,k-1]) < error)) :
+           return k,matrix
 
-        sum = 0.0
-        powerOf2 = 2 * powerOf2
-        for k in range( 1, powerOf2, 2 ):
-            sum = sum + f( a + k * h )
-
-        matrix[i,0] = 0.5 * matrix[i-1,0] + sum * h
-
-        powerOf4 = 1
-        for j in xrange( 1, i + 1 ):
-            powerOf4 = 4 * powerOf4
-            matrix[i,j] = matrix[i,j-1] + ( matrix[i,j-1] - matrix[i-1,j-1] ) / ( powerOf4 - 1 )
-
-    return matrix
+    return p,matrix
 
 
 def trapezoidal_rule(f, a, b, n):
     h = (b - a) / n
-    s = f(a) + f(b)
-    for i in xrange(1, n):
-        s += 2 * f(a + i * h)
-    return s * h / 2
+    x = a
+
+    sum = f(a)
+    for k in range(1, n):
+        x = x + h
+        sum += 2 * f(x)
+
+    return (sum + f(b)) * h * 0.5
 
 
 """
 MAIN.................................................................................
 """
+
+f = lambda x: math.sin(x)/x
+g = lambda x: math.log(x, math.e)
+
+for i in range(1,25):
+     print "Resultado de trapecios para f (%d) = %f " % (i,trapezoidal_rule(f,2.0,3.0,i))
+
+for i in range(1,25):
+     print "Resultado de trapecios para g (%d) = %f " % (i, trapezoidal_rule(g, 1.0, 3.0, i))
+
+result = romberg(f, 2.0, 3.0, 15, 10**-6)
+last = result[0]
+print "Result romberg %d , %f" % (result[0],result[1][last-1][last-1])
+
+result = romberg(g, 1.0, 3.0, 15,10**-6)
+last = result[0]
+print "Result romberg %d , %f" % (result[0],result[1][last-1][last-1])
+
 h = 0.1
 y0 = 1
 x0 = 0
