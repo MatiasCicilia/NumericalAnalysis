@@ -1,34 +1,28 @@
 import numpy
 import math
 
-def fun(x, y):
-    return -2*(x*y)
+def runge_kutta(f, iterations, h, x, y):
+    value = x,y
+    for i in range(1, iterations+1):
+        value = runge_kutta_formula(f, h, value[0], value[1])
+    return value
 
-
-def runge_kutta(h, x0, y0):
-    x = x0 + h
-    k1 = h * fun(x0, y0)
-    k2 = h * fun(x0 + (h/2), y0 + (k1/2))
-    k3 = h * fun(x0 + (h/2), y0 + (k2/2))
-    k4 = h * fun(x0 + h, y0 + k3)
+def runge_kutta_formula(f, h, x, y):
+    x = x + h
+    k1 = h * f(x, y)
+    k2 = h * f(x + (h / 2), y + (k1 / 2))
+    k3 = h * f(x + (h / 2), y + (k2 / 2))
+    k4 = h * f(x + h, y + k3)
     m = (k1 + 2*k2 + 2*k3 + k4)/6
-    y = y0 + m
-    return [x, y]
-
-
-def runge_kutta_iter(iterations, h, x0, y0):
-    result = runge_kutta(h, x0, y0)
-    for i in range(1, iterations):
-        result = runge_kutta(h, result[0], result[1])
-    return result
-
+    y = y + m
+    return x, y
 
 def romberg(f, a, b, p,error):
     matrix = numpy.zeros((p, p))
     for k in range(0, p):
 
         matrix[k, 0] = trapezoidal_rule(f, a, b, 2 ** k)
-        
+
         for j in range(0, k):
             matrix[k, j + 1] = (4 ** (j + 1) * matrix[k, j] - matrix[k - 1, j]) / (4 ** (j + 1) - 1)
 
@@ -36,7 +30,6 @@ def romberg(f, a, b, p,error):
            return k,matrix
 
     return p,matrix
-
 
 def trapezoidal_rule(f, a, b, n):
     h = (b - a) / n
@@ -49,20 +42,22 @@ def trapezoidal_rule(f, a, b, n):
 
     return (sum + f(b)) * h * 0.5
 
-
 """
 MAIN.................................................................................
 """
 
 f = lambda x: math.sin(x)/x
 g = lambda x: math.log(x, math.e)
+h = lambda x: math.sin(x) / x
 
+#-------------------------------TRAPECIOS-------------------------------
 for i in range(1,25):
      print "Resultado de trapecios para f (%d) = %f " % (i,trapezoidal_rule(f,2.0,3.0,i))
 
 for i in range(1,25):
      print "Resultado de trapecios para g (%d) = %f " % (i, trapezoidal_rule(g, 1.0, 3.0, i))
 
+#-------------------------------ROMBERG-------------------------------
 result = romberg(f, 2.0, 3.0, 15, 10**-6)
 last = result[0]
 print "Result romberg %d , %f" % (result[0],result[1][last-1][last-1])
@@ -71,10 +66,8 @@ result = romberg(g, 1.0, 3.0, 15,10**-6)
 last = result[0]
 print "Result romberg %d , %f" % (result[0],result[1][last-1][last-1])
 
-h = 0.1
-y0 = 1
-x0 = 0
+#-------------------------------RUNGE KUTTA-------------------------------
 for i in range(1, 11):
-    result = runge_kutta_iter(i,h,x0,y0)
+    result = runge_kutta(h, i, 0.1, 0, 1)
     print "X(%d) = %f" % (i, result[0])
     print "Y(%d) = %f" % (i, result[1])
