@@ -17,11 +17,11 @@ def runge_kutta_formula(f, h, x, y):
     y_new = y + m
     return [x_new,y_new]
 
-def romberg(f, a, b, p,error):
+def romberg(f, a, b, p,error,h):
     matrix = numpy.zeros((p, p))
     for k in range(0, p):
 
-        matrix[k, 0] = trapezoidal_rule(f, a, b, 2 ** k)
+        matrix[k, 0] = trapezoidal_rule(f, a, b, 2**k,h)
 
         for j in range(0, k):
             matrix[k, j + 1] = (4 ** (j + 1) * matrix[k, j] - matrix[k - 1, j]) / (4 ** (j + 1) - 1)
@@ -31,7 +31,7 @@ def romberg(f, a, b, p,error):
 
     return p,matrix
 
-def trapezoidal_rule(f, a, b, n):
+def trapezoidal_rule(f, a, b, n,h):
     h = (b - a) / n
     x = a
 
@@ -52,17 +52,17 @@ h = lambda x,y: -2.0*x*y
 
 #-------------------------------TRAPECIOS-------------------------------
 for i in range(1,25):
-     print "Resultado de trapecios para f (%d) = %f " % (i,trapezoidal_rule(f,2.0,3.0,i))
+     print "Resultado de trapecios para f (%d) = %f " % (i,trapezoidal_rule(f,2.0,3.0,i,10))
 
 for i in range(1,25):
-     print "Resultado de trapecios para g (%d) = %f " % (i, trapezoidal_rule(g, 1.0, 3.0, i))
+     print "Resultado de trapecios para g (%d) = %f " % (i, trapezoidal_rule(g, 1.0, 3.0, i,10))
 
 #-------------------------------ROMBERG-------------------------------
-result = romberg(f, 2.0, 3.0, 15, 10**-6)
+result = romberg(f, 2.0, 3.0, 15, 10**-6,10)
 last = result[0]
 print "Result romberg %d , %f" % (result[0],result[1][last-1][last-1])
 
-result = romberg(g, 1.0, 3.0, 15,10**-6)
+result = romberg(g, 1.0, 3.0, 15,10**-6,10)
 last = result[0]
 print "Result romberg %d , %f" % (result[0],result[1][last-1][last-1])
 
