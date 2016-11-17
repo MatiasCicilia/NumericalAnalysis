@@ -32,7 +32,7 @@ def romberg(f, a, b, p,error,h):
     return p,matrix
 
 def trapezoidal_rule(f, a, b, n,h):
-    h = (b - a) / n
+    h = (b - a) / (n*h)
     x = a
 
     sum = f(a)
